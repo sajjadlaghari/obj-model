@@ -6,142 +6,179 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
 
-    <script src="https://unpkg.com/three@0.87.1/build/three.js"></script>
-    <script src="https://unpkg.com/three@0.87.1/examples/js/controls/OrbitControls.js"></script>
-    <script src="https://unpkg.com/three@0.87.1/examples/js/loaders/MTLLoader.js"></script>
-    <script src="https://unpkg.com/three@0.87.1/examples/js/loaders/OBJLoader.js"></script>
 
+    <script src="https://threejsfundamentals.org/threejs/resources/threejs/r103/three.min.js"></script>
+    <script src="https://threejsfundamentals.org/threejs/resources/threejs/r103/js/controls/OrbitControls.js"></script>
+    <script src="https://threejsfundamentals.org/threejs/resources/threejs/r103/js/loaders/LoaderSupport.js"></script>
+    <script src="https://threejsfundamentals.org/threejs/resources/threejs/r103/js/loaders/OBJLoader2.js"></script>
+    <script src="https://threejsfundamentals.org/threejs/resources/threejs/r103/js/loaders/MTLLoader.js"></script>
     <style>
-        canvas {
-            display: block;
+        html,
+        body {
+            margin: 0;
+            height: 100%;
         }
 
-        html {
-            overflow: hidden;
-            background: #000;
+        #c {
+            width: 100%;
+            height: 100%;
+            display: block;
         }
     </style>
 </head>
 
 <body>
 
+    <canvas id="c"></canvas>
+
+
 
     <script>
+        // Three.js - Load .OBJ and .MTL file - Windmill2
+        // from https://threejsfundamentals.org/threejs/threejs-load-obj-materials-windmill2.html
 
-        const backgroundColor = 0x000000;
+        'use strict';
 
-        /*////////////////////////////////////////*/
+        /* global THREE */
 
-        var renderCalls = [];
-        function render() {
-            requestAnimationFrame(render);
-            renderCalls.forEach((callback) => { callback(); });
-        }
-        render();
+        function main() {
+            const canvas = document.querySelector('#c');
+            const renderer = new THREE.WebGLRenderer({ canvas: canvas });
 
-        /*////////////////////////////////////////*/
+            const fov = 45;
+            const aspect = 2;  // the canvas default
+            const near = 0.1;
+            const far = 100;
+            const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+            camera.position.set(0, 10, 20);
 
-        var scene = new THREE.Scene();
+            const controls = new THREE.OrbitControls(camera, canvas);
+            controls.target.set(0, 5, 0);
+            controls.update();
 
-        var camera = new THREE.PerspectiveCamera(80, window.innerWidth / window.innerHeight, 0.1, 800);
-        camera.position.set(5, 10, 7);
+            const scene = new THREE.Scene();
+            scene.background = new THREE.Color('white');
 
-        var renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setPixelRatio(window.devicePixelRatio);
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setClearColor(backgroundColor);//0x );
+            {
+                const planeSize = 4000;
 
-        renderer.toneMapping = THREE.LinearToneMapping;
-        renderer.toneMappingExposure = Math.pow(0.94, 5.0);
-        renderer.shadowMap.enabled = true;
-        renderer.shadowMap.type = THREE.PCFShadowMap;
+                const loader = new THREE.TextureLoader();
+                const texture = loader.load('');
+                texture.wrapS = THREE.RepeatWrapping;
+                texture.wrapT = THREE.RepeatWrapping;
+                texture.magFilter = THREE.NearestFilter;
+                const repeats = planeSize / 200;
+                texture.repeat.set(repeats, repeats);
 
-        window.addEventListener('resize', function () {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        }, false);
+                const planeGeo = new THREE.PlaneBufferGeometry(planeSize, planeSize);
+                const planeMat = new THREE.MeshPhongMaterial({
+                    map: texture,
+                    side: THREE.DoubleSide,
+                });
+                const mesh = new THREE.Mesh(planeGeo, planeMat);
+                mesh.rotation.x = Math.PI * -.5;
+                scene.add(mesh);
+            }
 
-        document.body.appendChild(renderer.domElement);
+            {
+                const skyColor = 0xB1E1FF;  // light blue
+                const groundColor = 0xB97A20;  // brownish orange
+                const intensity = 1;
+                const light = new THREE.HemisphereLight(skyColor, groundColor, intensity);
+                scene.add(light);
+            }
 
-        function renderScene() { renderer.render(scene, camera); }
-        renderCalls.push(renderScene);
+            {
+                const color = 0xFFFFFF;
+                const intensity = 1;
+                const light = new THREE.DirectionalLight(color, intensity);
+                light.position.set(5, 10, 2);
+                scene.add(light);
+                scene.add(light.target);
+            }
 
-        /* ////////////////////////////////////////////////////////////////////////// */
+            function frameArea(sizeToFitOnScreen, boxSize, boxCenter, camera) {
+                const halfSizeToFitOnScreen = sizeToFitOnScreen * 0.5;
+                const halfFovY = THREE.Math.degToRad(camera.fov * .5);
+                const distance = halfSizeToFitOnScreen / Math.tan(halfFovY);
+                // compute a unit vector that points in the direction the camera is now
+                // in the xz plane from the center of the box
+                const direction = (new THREE.Vector3())
+                    .subVectors(camera.position, boxCenter)
+                    .multiply(new THREE.Vector3(1, 0, 1))
+                    .normalize();
 
-        var controls = new THREE.OrbitControls(camera);
+                // move the camera to a position distance units way from the center
+                // in whatever direction the camera was from the center already
+                camera.position.copy(direction.multiplyScalar(distance).add(boxCenter));
 
-        controls.rotateSpeed = 0.3;
-        controls.zoomSpeed = 0.9;
+                // pick some near and far values for the frustum that
+                // will contain the box.
+                camera.near = boxSize / 100;
+                camera.far = boxSize * 100;
 
-        controls.minDistance = 3;
-        controls.maxDistance = 20;
+                camera.updateProjectionMatrix();
 
-        controls.minPolarAngle = 0; // radians
-        controls.maxPolarAngle = Math.PI / 2; // radians
+                // point the camera to look at the center of the box
+                camera.lookAt(boxCenter.x, boxCenter.y, boxCenter.z);
+            }
 
-        controls.enableDamping = true;
-        controls.dampingFactor = 0.05;
+            {
+                const objLoader = new THREE.OBJLoader2();
+                objLoader.loadMtl('', null, (materials) => {
+                    objLoader.setMaterials(materials);
+                    objLoader.load('scene.obj', (event) => {
+                        const root = event.detail.loaderRootNode;
+                        scene.add(root);
 
-        renderCalls.push(function () {
-            controls.update()
-        });
+                        // compute the box that contains all the stuff
+                        // from root and below
+                        const box = new THREE.Box3().setFromObject(root);
 
+                        const boxSize = box.getSize(new THREE.Vector3()).length();
+                        const boxCenter = box.getCenter(new THREE.Vector3());
 
-        /* ////////////////////////////////////////////////////////////////////////// */
+                        // set the camera to frame the box
+                        frameArea(boxSize * 1.2, boxSize, boxCenter, camera);
 
+                        // update the Trackball controls to handle the new size
+                        controls.maxDistance = boxSize * 10;
+                        controls.target.copy(boxCenter);
+                        controls.update();
+                    });
+                });
+            }
 
-        var light = new THREE.PointLight(0xffffcc, 4, 200);
-        light.position.set(4, 15, -20);
-        scene.add(light);
+            function resizeRendererToDisplaySize(renderer) {
+                const canvas = renderer.domElement;
+                const width = canvas.clientWidth;
+                const height = canvas.clientHeight;
+                const needResize = canvas.width !== width || canvas.height !== height;
+                if (needResize) {
+                    renderer.setSize(width, height, false);
+                }
+                return needResize;
+            }
 
-        var light2 = new THREE.AmbientLight(0x20202A, 6, 100);
-        // light2.position.set( 30, -10, 30 );
-        scene.add(light2);
+            function render() {
 
-        /* ////////////////////////////////////////////////////////////////////////// */
-
-
-        CustomBounce.create("myBounce", { strength: 0.4, squash: 0 });
-
-
-        var mtlLoader = new THREE.MTLLoader();
-        mtlLoader.crossOrigin = true;
-        mtlLoader.setPath('https://s3-us-west-2.amazonaws.com/s.cdpn.io/39255/');
-        mtlLoader.load('', function (materials) {
-
-            materials.preload();
-            var objLoader = new THREE.OBJLoader();
-            console.log(materials);
-            objLoader.setMaterials(materials);
-            objLoader.setPath('https://s3-us-west-2.amazonaws.com/s.cdpn.io/39255/');
-            objLoader.load('GameBoy.obj', function (object) {
-
-                for (var key in materials.materials) {
-                    materials.materials[key].reflectivity = 0.3;
-                    materials.materials[key].shininess = 10;
+                if (resizeRendererToDisplaySize(renderer)) {
+                    const canvas = renderer.domElement;
+                    camera.aspect = canvas.clientWidth / canvas.clientHeight;
+                    camera.updateProjectionMatrix();
                 }
 
-                object.position.set(0, 0, 5);
-                object.rotation.set(Math.PI / -2, 0, 0);
+                renderer.render(scene, camera);
 
-                TweenLite.from(object.rotation, 1.3, {
-                    y: Math.PI * 2,
-                    ease: 'Power3.easeOut'
-                });
+                requestAnimationFrame(render);
+            }
 
-                TweenLite.from(object.position, 1.6, {
-                    y: 10,
-                    ease: 'myBounce'
-                });
-                //object.position.y = - 95;
-                scene.add(object);
-            });
-            //, onProgress, onError );
-        });
+            requestAnimationFrame(render);
+        }
+
+        main();
 
     </script>
-
 </body>
 
 </html>
