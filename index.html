@@ -127,7 +127,7 @@
                 const objLoader = new THREE.OBJLoader2();
                 objLoader.loadMtl('', null, (materials) => {
                     objLoader.setMaterials(materials);
-                    objLoader.load('https://threejsfundamentals.org/threejs/resources/models/windmill_2/windmill.obj', (event) => {
+                    objLoader.load('scene.obj', (event) => {
                         const root = event.detail.loaderRootNode;
                         scene.add(root);
 
