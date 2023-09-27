@@ -57,13 +57,13 @@
             controls.update();
 
             const scene = new THREE.Scene();
-            scene.background = new THREE.Color('black');
+            scene.background = new THREE.Color('white');
 
             {
                 const planeSize = 4000;
 
                 const loader = new THREE.TextureLoader();
-                const texture = loader.load('https://threejsfundamentals.org/threejs/resources/images/checker.png');
+                const texture = loader.load('');
                 texture.wrapS = THREE.RepeatWrapping;
                 texture.wrapT = THREE.RepeatWrapping;
                 texture.magFilter = THREE.NearestFilter;
