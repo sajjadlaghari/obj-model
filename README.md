@@ -1,1 +1,1 @@
-"# obj-model" 
+# Rendering 3D OBJ models in THREE.js

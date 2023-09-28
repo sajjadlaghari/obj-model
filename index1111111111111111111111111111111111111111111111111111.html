@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>three.js webgl - OBJLoader2 basic usage</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
+    <style>
+        body {
+    margin: 0;
+    overflow: hidden;
+    font-family: Georgia, sans-serif;
+}
+
+h1 {
+    position: absolute;
+    top:0; right:.5em;
+    margin: 0;
+    color: gainsboro;
+}
+
+#obj-editor {
+    position: absolute;
+    top:0; left:0;
+
+    input { display: none; }
+    label {
+        display: block;
+        padding: .5em 1em;
+        cursor: pointer;
+        border-bottom: 1px solid black;
+        background: steelblue;
+        color: white;
+    }
+
+    #edit, .CodeMirror {
+        display: none;
+        width:20em; height:30vh;
+        white-space: nowrap;
+    }
+    #toggle-edit:checked ~ #edit,
+    #toggle-edit:checked ~ .CodeMirror {
+        display: block;
+    }
+}
+    </style>
+  </head>
+
+  <body>
+
+    <!-- File drop -->
+<script src="//codepen.io/Sphinxxxx/pen/VejGLv.js"></script>
+<!-- CodeMirror editor -->
+<script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.29.0/codemirror.min.js"></script>
+<script src="//cdn.rawgit.com/Sphinxxxx/cm-resize/v0.1/src/cm-resize.js"></script>
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.29.0/codemirror.min.css" />
+<!-- three.js -->
+<script src="//cdnjs.cloudflare.com/ajax/libs/three.js/87/three.min.js"></script>
+<script src="//cdn.rawgit.com/mrdoob/three.js/r87/examples/js/controls/OrbitControls.js"></script>
+<script src="//cdn.rawgit.com/mrdoob/three.js/r87/examples/js/exporters/OBJExporter.js"></script>
+<script src="//cdn.rawgit.com/mrdoob/three.js/r87/examples/js/loaders/OBJLoader.js"></script>
+<script src="//cdn.rawgit.com/mrdoob/three.js/r87/examples/js/loaders/STLLoader.js"></script>
+
+
+<h1>Drop an .obj or .stl file here</h1>
+
+<!-- My scene -->
+<canvas id="scene"></canvas>
+
+<div id="obj-editor">
+    <input  id="toggle-wire" type="checkbox" />
+    <label for="toggle-wire" >Toggle wireframe</label>
+    
+    <input  id="toggle-edit" type="checkbox" checked />
+    <label for="toggle-edit" >.obj editor</label>
+
+    <textarea id="edit" spellcheck="false">
+
+    </textarea>
+</div>
+
+
+
+<script>
+    /*
+  https://codepen.io/Mamboleoo/pen/PqjGdN
+  http://mamboleoo.be/learnThree/
+*/
+
+const VIEW_ANGLE = 60;
+
+let renderer, scene, camera, cameraControls, banana,
+    material = new THREE.MeshPhongMaterial({
+        color: 'lime',
+        //wireframe: true,
+        side: THREE.DoubleSide,
+    });
+
+function init() {
+    renderer = new THREE.WebGLRenderer({canvas : document.getElementById('scene')});
+    scene = new THREE.Scene();
+
+    camera = new THREE.PerspectiveCamera(VIEW_ANGLE, 16/9, 0.1, 10000 );
+    camera.position.set(0, 0, 100);
+    scene.add(camera);
+
+    function resize() {
+        var aspect = window.innerWidth / window.innerHeight;
+        camera.aspect = aspect;
+        camera.fov = VIEW_ANGLE/((aspect+1)/2);
+        camera.updateProjectionMatrix();
+
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+    window.addEventListener('resize', resize, false);
+    resize();
+
+    //Add lights in the scene
+    var directionalLight = new THREE.DirectionalLight( 0xffffff, 0.8 );
+    directionalLight.position.set( 0, 0, 350 );
+    directionalLight.lookAt(new THREE.Vector3(0,0,0));
+    scene.add( directionalLight );
+    
+    var mainLight = new THREE.AmbientLight( 0xffffff, .3 );
+    scene.add( mainLight );
+
+    //Controls
+    cameraControls = new THREE.OrbitControls(camera, renderer.domElement);
+    cameraControls.target.set(0, 0, 0);
+    cameraControls.update();
+}
+
+function render() {
+    requestAnimationFrame(render);
+
+    cameraControls.update();
+    renderer.render(scene, camera);
+}
+
+
+function loadOBJ(objUrl, type, callback) {
+    //Manager from ThreeJs to track a loader and its status
+    const manager = new THREE.LoadingManager();
+    let loader;
+    switch(type) {
+        case 'obj':
+            loader = new THREE.OBJLoader(manager);
+            break;
+        case 'stl':
+            loader = new THREE.STLLoader(manager);
+            break;
+        default:
+            throw "Unknown file type: " + type;
+    }
+
+    //Launch loading of the obj file, addBananaInScene is the callback when it's ready 
+    //var objUrl = 'http://crossorigin.me/http://collabedit.com/download?id=7dmu4';
+    loader.load(objUrl, (o) => addBananaInScene(o, callback));
+}
+
+function addBananaInScene(object, callback) {
+    if(banana) {
+        scene.remove(banana);
+    }
+    banana = object;
+    
+    //Go through all children of the loaded object and search for a Mesh
+    if(banana.type === 'Group') {
+        banana.traverse(child => {
+            //This allow us to check if the children is an instance of the Mesh constructor
+            if(child instanceof THREE.Mesh) {
+                child.material = material;
+                //Sometimes there are some vertex normals missing in the .obj files, ThreeJs will compute them
+                child.geometry.computeVertexNormals();
+            }
+        });
+    }
+    //.stl
+    //https://threejs.org/examples/webgl_loader_stl.html
+    else if((banana instanceof THREE.Geometry) || (banana instanceof THREE.BufferGeometry)) {
+        var mesh = new THREE.Mesh(banana, material);
+        banana = mesh;
+    }
+
+    //Add the 3D object in the scene
+    //banana.rotation.x = Math.PI;
+    //banana.position.z = 50;
+    scene.add(banana);
+    if(callback) { callback(banana); }
+}
+
+
+console.clear();
+init();
+render();
+
+
+/* .obj editor */
+let myCodeMirror;
+(function initEditor() {
+    document.querySelector('#toggle-wire').onchange = (e) => {
+        material.wireframe = e.target.checked;
+    }
+    
+    const objText = document.querySelector('#edit');
+    
+    //A normal <textarea> doesn't handle large amount of text well..
+    //  objText.addEventListener('input', reloadObj);
+    myCodeMirror = CodeMirror.fromTextArea(objText);
+    myCodeMirror.on('change', reloadObj);
+    cmResize(myCodeMirror);
+
+    function reloadObj() {
+        var obj = myCodeMirror.getValue(); //objText.value;
+        //http://dopiaza.org/tools/datauri/index.php
+        //http://stackoverflow.com/questions/246801/how-can-you-encode-a-string-to-base64-in-javascript
+        var objUrl = 'armchair-019,' + btoa(obj);
+        loadOBJ(objUrl, 'obj');
+    }
+    reloadObj();
+})();
+
+/* File drop */
+(function initDrop() {
+    ABOUtils.dropFile(document.getElementById('scene'), (url, file) => {
+        const type = file.name.split('.').pop().toLowerCase();
+        loadOBJ(url, type, function(obj) {
+            //Update the editor:
+            var exporter = new THREE.OBJExporter();
+            var result = exporter.parse(obj);
+            //console.log(result);
+            myCodeMirror.setValue(result);
+        });
+    })
+})();
+</script>
+   
+ 
+  </body>
+</html>
