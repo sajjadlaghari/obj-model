@@ -1,129 +1,36 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Model Viewer</title>
 
-        <title>Babylon.js sample code</title>
-
-        <!-- Babylon.js -->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.6.2/dat.gui.min.js"></script>
-        <script src="https://assets.babylonjs.com/generated/Assets.js"></script>
-        <script src="https://cdn.babylonjs.com/recast.js"></script>
-        <script src="https://cdn.babylonjs.com/ammo.js"></script>
-        <script src="https://cdn.babylonjs.com/havok/HavokPhysics_umd.js"></script>
-        <script src="https://cdn.babylonjs.com/cannon.js"></script>
-        <script src="https://cdn.babylonjs.com/Oimo.js"></script>
-        <script src="https://cdn.babylonjs.com/earcut.min.js"></script>
-        <script src="https://cdn.babylonjs.com/babylon.js"></script>
-        <script src="https://cdn.babylonjs.com/materialsLibrary/babylonjs.materials.min.js"></script>
-        <script src="https://cdn.babylonjs.com/proceduralTexturesLibrary/babylonjs.proceduralTextures.min.js"></script>
-        <script src="https://cdn.babylonjs.com/postProcessesLibrary/babylonjs.postProcess.min.js"></script>
-        <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.js"></script>
-        <script src="https://cdn.babylonjs.com/serializers/babylonjs.serializers.min.js"></script>
-        <script src="https://cdn.babylonjs.com/gui/babylon.gui.min.js"></script>
-        <script src="https://cdn.babylonjs.com/inspector/babylon.inspector.bundle.js"></script>
-
-        <style>
-            html, body {
-                overflow: hidden;
-                width: 100%;
-                height: 100%;
-                margin: 0;
-                padding: 0;
-            }
-
-            #renderCanvas {
-                width: 100%;
-                height: 100%;
-                touch-action: none;
-            }
-            
-            #canvasZone {
-                width: 100%;
-                height: 100%;
-            }
-        </style>
-    </head>
+    <!-- Include Three.js library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- Include OBJLoader (CDN) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/loaders/OBJLoader.js"></script>
+</head>
 <body>
-    <div id="canvasZone"><canvas id="renderCanvas"></canvas></div>
+    <div id="viewer-container"></div>
+
     <script>
-        var canvas = document.getElementById("renderCanvas");
+        var scene, camera, renderer;
 
-        var startRenderLoop = function (engine, canvas) {
-            engine.runRenderLoop(function () {
-                if (sceneToRender && sceneToRender.activeCamera) {
-                    sceneToRender.render();
-                }
-            });
-        }
+        // Initialize your scene, camera, and renderer here
 
-        var engine = null;
-        var scene = null;
-        var sceneToRender = null;
-        var createDefaultEngine = function() { return new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true,  disableWebGL2Support: false}); };
-        var delayCreateScene = function () {
-            
-            var scene = new BABYLON.Scene(engine);  
-        
-            BABYLON.SceneLoader.ImportMesh("", "scenes/", "armchair-019.obj", scene, function (meshes) {          
-                scene.createDefaultCameraOrLight(true, true, true);
-                scene.createDefaultEnvironment();
-        
-                var cuteRabbit = meshes[0];
-        
-                // custom material creation
-                var wonderfulMtl = new BABYLON.PBRMaterial("yeah", scene);
-                wonderfulMtl.metallic = 0;
-                wonderfulMtl.roughness = 0.1;
-                wonderfulMtl.albedoTexture = new BABYLON.Texture("textures/amiga.jpg", scene);
-                wonderfulMtl.albedoTexture.uScale = wonderfulMtl.albedoTexture.vScale = 10;
-        
-                // custom material applied on our mesh
-                //cuteRabbit.material = wonderfulMtl;
-     
-                jQuery.get('"scenes/", "armchair-019.mtl"', function(data) {
-                    // our mtl file is loaded as text
-                    console.log("---MTL file---");
-                    alert(11);
-                    console.log(data);
-                    var mtlLoader = new BABYLON.MTLFileLoader().parseMTL(
-                        scene,
-                        data,
-                        "https://raw.githubusercontent.com/BabylonJS/Babylon.js/master/Playground/scenes/Box/"
-                    );
-                    // material "01___Default" contained in Box.mtl is now loaded
-                    console.log("---imported materials---");
-                    cuteRabbit.material = scene.getMaterialByName("01___Default");
-                });
-                
-            });
-        
-            return scene;
-        };
-                window.initFunction = async function() {
-                    
-                    
-                    
-                    var asyncEngineCreation = async function() {
-                        try {
-                        return createDefaultEngine();
-                        } catch(e) {
-                        console.log("the available createEngine function failed. Creating the default engine instead");
-                        return createDefaultEngine();
-                        }
-                    }
+        // Create an OBJLoader instance
+        var objLoader = new THREE.OBJLoader();
 
-                    window.engine = await asyncEngineCreation();
-        if (!engine) throw 'engine should not be null.';
-        startRenderLoop(engine, canvas);
-        window.scene = delayCreateScene();};
-        initFunction().then(() => {sceneToRender = scene                    
+        // Load your .obj model
+        objLoader.load('scene/armchair-019.obj', function (object) {
+            // This function is called when the model is loaded
+
+            // Add the loaded object to the scene
+            scene.add(object);
         });
 
-        // Resize
-        window.addEventListener("resize", function () {
-            engine.resize();
-        });
+        // Implement your rendering and animation logic here
+
     </script>
 </body>
 </html>
