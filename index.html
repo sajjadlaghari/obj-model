@@ -7,8 +7,6 @@
 
     <!-- Include Three.js library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <!-- Include OBJLoader (CDN) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/loaders/OBJLoader.js"></script>
 </head>
 <body>
     <div id="viewer-container"></div>
@@ -18,7 +16,7 @@
 
         // Initialize your scene, camera, and renderer here
 
-        // Create an OBJLoader instance
+        // Create a new OBJLoader
         var objLoader = new THREE.OBJLoader();
 
         // Load your .obj model
