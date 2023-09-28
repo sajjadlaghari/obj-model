@@ -1,19 +1,70 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <link rel="stylesheet" href="styles.css">
-    <title>Face Model</title>
-</head>
-
+    <title>Alert on All Fields Filled</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  </head>
 <body>
-    <canvas id="c"></canvas>
-    <script src='https://cdnjs.cloudflare.com/ajax/libs/three.js/108/three.min.js'></script>
-	<script src='https://cdn.jsdelivr.net/gh/mrdoob/Three.js@r92/examples/js/loaders/GLTFLoader.js'></script>
-	<script src='https://cdn.jsdelivr.net/gh/mrdoob/Three.js@r92/examples/js/loaders/OBJLoader.js'></script>
-    <script src="app.js"></script>
-</body>
 
+<!-- Your HTML form with 20 fields -->
+<div class="container">
+  <h1 class="text-center">Input Fields</h1> <label for="" class="" id="id"><i class="fa-solid fa-circle-check" style="color: blue;"></i></label>
+  <div class="container text-center">
+    <input type="checkbox" class="checkbox" id="checkbox">&nbsp; Samsung <span style="display: none;">Checked</span>
+  </div>
+  <div class="row d-flex justify-content-center">
+    <div class="col-md-6">
+      <input type="text" class="samsun_field form-control mt-4" style="display: none;">
+      <input type="text" class="samsun_field form-control mt-4" style="display: none;">
+      <input type="text" class="samsun_field form-control mt-4" style="display: none;">
+      <input type="text" class="samsun_field form-control mt-4" style="display: none;">
+      <input type="text" class="samsun_field form-control mt-4" style="display: none;">
+      <input type="text" class="samsun_field form-control mt-4" style="display: none;">
+      <input type="text" class="samsun_field form-control mt-4" style="display: none;">
+      <input type="text" class="samsun_field form-control mt-4" style="display: none;">
+    </div>
+  </div>
+  <div class="row d-flex justify-content-center mt-4">
+    <div class="col-md-6 text-center">
+      <button id="checkFields">Check Fields</button>
+    </div>
+  </div>
+</div>
+<!-- Add the rest of your fields here -->
+
+<script>
+$(document).ready(function(){
+    $("#checkbox").change(function(){
+        var isChecked = $(this).is(":checked");
+        if (isChecked) {
+            $(".samsun_field").show();
+          
+        } else {
+            $(".samsun_field").hide();
+            $("span").hide();
+        }
+    });
+
+    $(".samsun_field").on("keyup", function(){
+        var allFieldsFilled = true;
+        $(".samsun_field").each(function() {
+            if ($(this).val() === "") {
+                allFieldsFilled = false;
+                return false; // Exit the loop early if any field is empty
+            }
+        });
+        
+        if (allFieldsFilled) {
+            $("span").text("Checked").show();
+         
+        } else {
+            $("span").hide();
+        }
+    });
+});
+</script>
+
+</body>
 </html>
