@@ -31,11 +31,11 @@
         camera.position.z = 5;
 
         const mtlLoader = new MTLLoader();
-        mtlLoader.load('path/to/your/model.mtl', (mtlParseResult) => {
+        mtlLoader.load('armchair-019.mtl', (mtlParseResult) => {
             const objLoader = new OBJLoader2();
             const materials = MtlObjBridge.addMaterialsFromMtlLoader(mtlParseResult);
             objLoader.addMaterials(materials);
-            objLoader.load('scene.obj', (event) => {
+            objLoader.load('armchair-019.obj', (event) => {
                 const root = event.detail.loaderRootNode;
                 scene.add(root);
             });
