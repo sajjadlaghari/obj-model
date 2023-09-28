@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>3D Model Viewer</title>
@@ -10,6 +11,7 @@
         }
     </style>
 </head>
+
 <body>
     <div id="viewer-container"></div>
     <script type="module">
@@ -18,6 +20,9 @@
         import { OBJLoader2 } from 'https://threejsfundamentals.org/threejs/resources/threejs/r122/examples/jsm/loaders/OBJLoader2.js';
         import { MTLLoader } from 'https://threejsfundamentals.org/threejs/resources/threejs/r122/examples/jsm/loaders/MTLLoader.js';
         import { MtlObjBridge } from 'https://threejsfundamentals.org/threejs/resources/threejs/r122/examples/jsm/loaders/obj2/bridge/MtlObjBridge.js';
+        import * as THREE from 'https://threejsfundamentals.org/threejs/resources/threejs/r122/build/three.module.js';
+        import { OrbitControls } from 'https://threejsfundamentals.org/threejs/resources/threejs/r122/examples/jsm/controls/OrbitControls.js';
+        import { OBJLoader2 } from 'https://threejsfundamentals.org/threejs/resources/threejs/r122/examples/jsm/loaders/OBJLoader2.js';
 
         const container = document.getElementById('viewer-container');
         const scene = new THREE.Scene();
@@ -30,22 +35,11 @@
 
         camera.position.z = 5;
 
-        const mtlLoader = new MTLLoader();
-mtlLoader.load('armchair-019.mtl', (mtlParseResult) => {
-    const objLoader = new OBJLoader2();
-    const materials = MtlObjBridge.addMaterialsFromMtlLoader(mtlParseResult);
-    objLoader.addMaterials(materials);
-    objLoader.load('armchair-019.obj', (event) => {
-        if (event.detail.loaderRootNode) {
+        const objLoader = new OBJLoader2();
+        objLoader.load('armchair-019.obj', (event) => {
             const root = event.detail.loaderRootNode;
             scene.add(root);
-
-            // You can access the loaded model and its properties here
-        } else {
-            console.error('Failed to load the model');
-        }
-    });
-});
+        });
 
         const animate = () => {
             requestAnimationFrame(animate);
@@ -54,6 +48,9 @@ mtlLoader.load('armchair-019.mtl', (mtlParseResult) => {
         };
 
         animate();
+
+
     </script>
 </body>
+
 </html>
