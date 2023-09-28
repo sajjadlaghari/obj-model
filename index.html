@@ -136,9 +136,9 @@
             objLoader.setModelName( modelName );
             objLoader.setMaterials( materials );
             objLoader.setLogging( true, true );
-            objLoader.load( "http://ilovejoes.weebly.com/uploads/1/9/4/9/19498995/basic_house-export.obj", callbackOnLoad, null, null, null, false );
+            objLoader.load( "armchair-019.obj", callbackOnLoad, null, null, null, false );
           };
-          objLoader.loadMtl( "http://ilovejoes.weebly.com/uploads/1/9/4/9/19498995/basic_house-export.mtl", null, onLoadMtl );
+          objLoader.loadMtl( "armchair-019.mtl", null, onLoadMtl );
         },
         _reportProgress: function( event ) {
           var output = THREE.LoaderSupport.Validator.verifyInput( event.detail.text, '' );
