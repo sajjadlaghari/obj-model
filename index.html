@@ -1,34 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Model Viewer</title>
-
-    <!-- Include Three.js library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-</head>
-<body>
-    <div id="viewer-container"></div>
-
-    <script>
-        var scene, camera, renderer;
-
-        // Initialize your scene, camera, and renderer here
-
-        // Create a new OBJLoader
-        var objLoader = new THREE.OBJLoader();
-
-        // Load your .obj model
-        objLoader.load('scene/armchair-019.obj', function (object) {
-            // This function is called when the model is loaded
-
-            // Add the loaded object to the scene
-            scene.add(object);
-        });
-
-        // Implement your rendering and animation logic here
-
-    </script>
-</body>
+	<head>
+		<title>3D File Viewer</title>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="stylesheet" href="style.css">
+		<script src="./libs/focus-visible.js" defer></script>
+		<script type="module" src="model-viewer.js"></script>
+		<script type="module" src="script.js"></script>
+	</head>
+	<body>
+		<model-viewer id="viewer" background-color="#e1e1e1" autoplay camera-controls></model-viewer>
+	</body>
 </html>
