@@ -31,15 +31,21 @@
         camera.position.z = 5;
 
         const mtlLoader = new MTLLoader();
-        mtlLoader.load('armchair-019.mtl', (mtlParseResult) => {
-            const objLoader = new OBJLoader2();
-            const materials = MtlObjBridge.addMaterialsFromMtlLoader(mtlParseResult);
-            objLoader.addMaterials(materials);
-            objLoader.load('armchair-019.obj', (event) => {
-                const root = event.detail.loaderRootNode;
-                scene.add(root);
-            });
-        });
+mtlLoader.load('armchair-019.mtl', (mtlParseResult) => {
+    const objLoader = new OBJLoader2();
+    const materials = MtlObjBridge.addMaterialsFromMtlLoader(mtlParseResult);
+    objLoader.addMaterials(materials);
+    objLoader.load('armchair-019.obj', (event) => {
+        if (event.detail.loaderRootNode) {
+            const root = event.detail.loaderRootNode;
+            scene.add(root);
+
+            // You can access the loaded model and its properties here
+        } else {
+            console.error('Failed to load the model');
+        }
+    });
+});
 
         const animate = () => {
             requestAnimationFrame(animate);
