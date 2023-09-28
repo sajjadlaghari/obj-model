@@ -1,149 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-
-    <script>console.clear();</script>
-    <script src="https://unpkg.com/three@0.87.1/build/three.js"></script>
-    <script src="https://unpkg.com/three@0.87.1/examples/js/controls/OrbitControls.js"></script>
-    <script src="https://unpkg.com/three@0.87.1/examples/js/loaders/MTLLoader.js"></script>
-    <script src="https://unpkg.com/three@0.87.1/examples/js/loaders/OBJLoader.js"></script>
+    <title>3D Model Viewer</title>
     <style>
-        canvas {
-            display: block;
-        }
-
-        html {
+        body {
+            margin: 0;
             overflow: hidden;
-            background: #000;
         }
     </style>
 </head>
-
 <body>
+    <div id="viewer-container"></div>
+    <script type="module">
+        import * as THREE from 'https://threejsfundamentals.org/threejs/resources/threejs/r122/build/three.module.js';
+        import { OrbitControls } from 'https://threejsfundamentals.org/threejs/resources/threejs/r122/examples/jsm/controls/OrbitControls.js';
+        import { OBJLoader2 } from 'https://threejsfundamentals.org/threejs/resources/threejs/r122/examples/jsm/loaders/OBJLoader2.js';
+        import { MTLLoader } from 'https://threejsfundamentals.org/threejs/resources/threejs/r122/examples/jsm/loaders/MTLLoader.js';
+        import { MtlObjBridge } from 'https://threejsfundamentals.org/threejs/resources/threejs/r122/examples/jsm/loaders/obj2/bridge/MtlObjBridge.js';
 
-    <canvas id="c"></canvas>
-
-
-
-    <script>
-
-        const backgroundColor = 0x000000;
-
-        /*////////////////////////////////////////*/
-
-        var renderCalls = [];
-        function render() {
-            requestAnimationFrame(render);
-            renderCalls.forEach((callback) => { callback(); });
-        }
-        render();
-
-        /*////////////////////////////////////////*/
-
-        var scene = new THREE.Scene();
-
-        var camera = new THREE.PerspectiveCamera(80, window.innerWidth / window.innerHeight, 0.1, 800);
-        camera.position.set(5, 10, 7);
-
-        var renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setPixelRatio(window.devicePixelRatio);
+        const container = document.getElementById('viewer-container');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer();
         renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setClearColor(backgroundColor);//0x );
+        container.appendChild(renderer.domElement);
 
-        renderer.toneMapping = THREE.LinearToneMapping;
-        renderer.toneMappingExposure = Math.pow(0.94, 5.0);
-        renderer.shadowMap.enabled = true;
-        renderer.shadowMap.type = THREE.PCFShadowMap;
+        const controls = new OrbitControls(camera, renderer.domElement);
 
-        window.addEventListener('resize', function () {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        }, false);
+        camera.position.z = 5;
 
-        document.body.appendChild(renderer.domElement);
-
-        function renderScene() { renderer.render(scene, camera); }
-        renderCalls.push(renderScene);
-
-        /* ////////////////////////////////////////////////////////////////////////// */
-
-        var controls = new THREE.OrbitControls(camera);
-
-        controls.rotateSpeed = 0.3;
-        controls.zoomSpeed = 0.9;
-
-        controls.minDistance = 3;
-        controls.maxDistance = 20;
-
-        controls.minPolarAngle = 0; // radians
-        controls.maxPolarAngle = Math.PI / 2; // radians
-
-        controls.enableDamping = true;
-        controls.dampingFactor = 0.05;
-
-        renderCalls.push(function () {
-            controls.update()
-        });
-
-
-        /* ////////////////////////////////////////////////////////////////////////// */
-
-
-        var light = new THREE.PointLight(0xffffcc, 4, 200);
-        light.position.set(4, 15, -20);
-        scene.add(light);
-
-        var light2 = new THREE.AmbientLight(0x20202A, 6, 100);
-        // light2.position.set( 30, -10, 30 );
-        scene.add(light2);
-
-        /* ////////////////////////////////////////////////////////////////////////// */
-
-
-        CustomBounce.create("myBounce", { strength: 0.4, squash: 0 });
-
-
-        var mtlLoader = new THREE.MTLLoader();
-        mtlLoader.crossOrigin = true;
-        mtlLoader.setPath('https://s3-us-west-2.amazonaws.com/s.cdpn.io/39255/');
-        mtlLoader.load('GameBoy.mtl', function (materials) {
-
-            materials.preload();
-            var objLoader = new THREE.OBJLoader();
-            console.log(materials);
-            objLoader.setMaterials(materials);
-            objLoader.setPath('https://s3-us-west-2.amazonaws.com/s.cdpn.io/39255/');
-            objLoader.load('GameBoy.obj', function (object) {
-
-                for (var key in materials.materials) {
-                    materials.materials[key].reflectivity = 0.3;
-                    materials.materials[key].shininess = 10;
-                }
-
-                object.position.set(0, 0, 5);
-                object.rotation.set(Math.PI / -2, 0, 0);
-
-                TweenLite.from(object.rotation, 1.3, {
-                    y: Math.PI * 2,
-                    ease: 'Power3.easeOut'
-                });
-
-                TweenLite.from(object.position, 1.6, {
-                    y: 10,
-                    ease: 'myBounce'
-                });
-                //object.position.y = - 95;
-                scene.add(object);
+        const mtlLoader = new MTLLoader();
+        mtlLoader.load('path/to/your/model.mtl', (mtlParseResult) => {
+            const objLoader = new OBJLoader2();
+            const materials = MtlObjBridge.addMaterialsFromMtlLoader(mtlParseResult);
+            objLoader.addMaterials(materials);
+            objLoader.load('scene.obj', (event) => {
+                const root = event.detail.loaderRootNode;
+                scene.add(root);
             });
-            //, onProgress, onError );
         });
 
+        const animate = () => {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        };
+
+        animate();
     </script>
 </body>
-
 </html>
