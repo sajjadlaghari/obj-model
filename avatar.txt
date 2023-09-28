@@ -1,5 +1,0 @@
-half body:
-https://d1a370nemizbjq.cloudfront.net/a7331c3f-0dc7-431c-88fa-5dfc951c92db.glb
-
-full body:
-https://d1a370nemizbjq.cloudfront.net/a4343a50-2ccc-4faf-91ae-cd57c79a4b18.glb
