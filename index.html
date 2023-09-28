@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <title>3D Model Viewer</title>
@@ -11,7 +10,6 @@
         }
     </style>
 </head>
-
 <body>
     <div id="viewer-container"></div>
     <script type="module">
@@ -33,7 +31,12 @@
         const objLoader = new OBJLoader2();
         objLoader.load('armchair-019.obj', (event) => {
             const root = event.detail.loaderRootNode;
-            scene.add(root);
+
+            if (root) {
+                scene.add(root);
+            } else {
+                console.error('Failed to load the model');
+            }
         });
 
         const animate = () => {
@@ -45,5 +48,4 @@
         animate();
     </script>
 </body>
-
 </html>
